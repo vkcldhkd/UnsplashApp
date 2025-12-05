@@ -9,10 +9,12 @@ import UIKit
 import Then
 import ReactorKit
 import RxSwift
+import RxCocoa
 import SnapKit
 
 final class SearchListViewController: BaseViewController {
     // MARK: Constants
+    typealias Reactor = SearchListViewReactor
     
     // MARK: Properties
     var heartButton: UIButton = UIButton().then {
@@ -26,10 +28,14 @@ final class SearchListViewController: BaseViewController {
     
     // MARK: UI
     let searchBar: UISearchBar = UISearchBar(frame: .zero)
-    
+    lazy var collectionView = BaseCollectionView(
+        frame: .zero,
+        collectionViewLayout: UICollectionViewFlowLayout()
+    )
     
     // MARK: Initializing
     init() {
+        defer { self.reactor = Reactor() }
         super.init(title: "Search")
     }
     
@@ -47,7 +53,14 @@ final class SearchListViewController: BaseViewController {
     
     override func setupConstraints() {
         self.searchBar.snp.makeConstraints { make in
-            make.leading.top.trailing.equalTo(self.view.safeAreaLayoutGuide)
+            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
+        }
+        
+        self.collectionView.snp.makeConstraints { make in
+            make.top.equalTo(self.searchBar.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
         }
     }
 }
@@ -57,6 +70,7 @@ private extension SearchListViewController {
     func setupUI() {
         self.setupSearchBar()
         self.setupNavigationBar()
+        self.setupCollectionView()
     }
     
     // MARK: - setupSearchBar
@@ -67,5 +81,25 @@ private extension SearchListViewController {
     // MARK: - setupNavigationBar
     func setupNavigationBar() {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: self.heartButton)
+    }
+    
+    // MARK: - setupCollectionView
+    func setupCollectionView() {
+        self.view.addSubview(self.collectionView)
+    }
+}
+
+
+extension SearchListViewController: ReactorKit.View {
+    func bind(reactor: Reactor) {
+        // MARK: - Action
+        self.heartButton.rx.tap
+            .throttle(.milliseconds(700), scheduler: MainScheduler.asyncInstance)
+            .subscribe(onNext: {
+                print("HEART BUTTON")
+            })
+            .disposed(by: self.disposeBag)
+        
+        // MARK: - State
     }
 }
