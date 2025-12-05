@@ -26,11 +26,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // View Layer
 //        let viewController = LottoSpotlightCircleViewController(fetchProfilesUseCase: useCase)
-        let viewController = ViewController()
+        let searchListViewController = BaseNavigationController(rootViewController: SearchListViewController())
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         self.window = UIWindow(windowScene: windowScene)
-        self.window?.rootViewController = viewController
+        self.window?.rootViewController = searchListViewController
         self.window?.makeKeyAndVisible()
     }
 }
