@@ -16,6 +16,8 @@
 		A818C0F52EE2C001007A6406 /* Codextended in Frameworks */ = {isa = PBXBuildFile; productRef = A818C0F42EE2C001007A6406 /* Codextended */; };
 		A818C0F82EE2C00E007A6406 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = A818C0F72EE2C00E007A6406 /* Then */; };
 		A818C0FB2EE2C026007A6406 /* RxDataSources in Frameworks */ = {isa = PBXBuildFile; productRef = A818C0FA2EE2C026007A6406 /* RxDataSources */; };
+		A818C18D2EE30A2B007A6406 /* ReusableKit in Frameworks */ = {isa = PBXBuildFile; productRef = A818C18C2EE30A2B007A6406 /* ReusableKit */; };
+		A818C18F2EE30A2B007A6406 /* RxReusableKit in Frameworks */ = {isa = PBXBuildFile; productRef = A818C18E2EE30A2B007A6406 /* RxReusableKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A818C18D2EE30A2B007A6406 /* ReusableKit in Frameworks */,
 				A818C0F22EE2BFF6007A6406 /* RxKingfisher in Frameworks */,
 				A818C0EA2EE2BFDC007A6406 /* RxCocoa in Frameworks */,
 				A818C0E42EE2BFBF007A6406 /* SnapKit in Frameworks */,
@@ -84,6 +87,7 @@
 				A818C0F52EE2C001007A6406 /* Codextended in Frameworks */,
 				A818C0EC2EE2BFDC007A6406 /* RxSwift in Frameworks */,
 				A818C0FB2EE2C026007A6406 /* RxDataSources in Frameworks */,
+				A818C18F2EE30A2B007A6406 /* RxReusableKit in Frameworks */,
 				A818C0EF2EE2BFE8007A6406 /* ReactorKit in Frameworks */,
 				A818C0E72EE2BFCA007A6406 /* Alamofire in Frameworks */,
 			);
@@ -155,6 +159,8 @@
 				A818C0F42EE2C001007A6406 /* Codextended */,
 				A818C0F72EE2C00E007A6406 /* Then */,
 				A818C0FA2EE2C026007A6406 /* RxDataSources */,
+				A818C18C2EE30A2B007A6406 /* ReusableKit */,
+				A818C18E2EE30A2B007A6406 /* RxReusableKit */,
 			);
 			productName = UnsplashCloneApp;
 			productReference = A818C0382EE2B0BB007A6406 /* UnsplashCloneApp.app */;
@@ -247,6 +253,7 @@
 				A818C0F32EE2C001007A6406 /* XCRemoteSwiftPackageReference "Codextended" */,
 				A818C0F62EE2C00E007A6406 /* XCRemoteSwiftPackageReference "Then" */,
 				A818C0F92EE2C026007A6406 /* XCRemoteSwiftPackageReference "RxDataSources" */,
+				A818C18B2EE30A2B007A6406 /* XCRemoteSwiftPackageReference "ReusableKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A818C0392EE2B0BB007A6406 /* Products */;
@@ -693,6 +700,14 @@
 				minimumVersion = 5.0.2;
 			};
 		};
+		A818C18B2EE30A2B007A6406 /* XCRemoteSwiftPackageReference "ReusableKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/ReusableKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -740,6 +755,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A818C0F92EE2C026007A6406 /* XCRemoteSwiftPackageReference "RxDataSources" */;
 			productName = RxDataSources;
+		};
+		A818C18C2EE30A2B007A6406 /* ReusableKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A818C18B2EE30A2B007A6406 /* XCRemoteSwiftPackageReference "ReusableKit" */;
+			productName = ReusableKit;
+		};
+		A818C18E2EE30A2B007A6406 /* RxReusableKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A818C18B2EE30A2B007A6406 /* XCRemoteSwiftPackageReference "ReusableKit" */;
+			productName = RxReusableKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

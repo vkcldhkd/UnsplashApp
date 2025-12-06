@@ -19,14 +19,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         
 //        // Data Layer
-//        let repository = RandomUserRepositoryImpl()
-//        
+        let repository = PhotoRepositoryImpl()
+//
 //        // Domain Layer
-//        let useCase = DefaultFetchProfilesUseCase(repository: repository)
-        
+        let useCase = LoadPhotosUseCaseImpl(repository: repository)
         // View Layer
-//        let viewController = LottoSpotlightCircleViewController(fetchProfilesUseCase: useCase)
-        let searchListViewController = BaseNavigationController(rootViewController: SearchListViewController())
+        
+        let searchListViewController = BaseNavigationController(
+            rootViewController: SearchListViewController(
+                reactor: SearchListViewReactor(loadPhotosUseCase: useCase)
+            )
+        )
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         self.window = UIWindow(windowScene: windowScene)

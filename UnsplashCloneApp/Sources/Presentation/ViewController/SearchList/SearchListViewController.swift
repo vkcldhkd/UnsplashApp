@@ -18,9 +18,7 @@ final class SearchListViewController: BaseViewController {
     
     // MARK: Properties
     var heartButton: UIButton = UIButton().then {
-        let heartImage = UIImage(systemName: "heart.fill")?
-            .withTintColor(.red, renderingMode: .alwaysTemplate)
-        
+        let heartImage = UIImage().heartImage
         $0.setImage(heartImage, for: .normal)
         $0.tintColor = .systemRed
         $0.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
@@ -34,8 +32,8 @@ final class SearchListViewController: BaseViewController {
     )
     
     // MARK: Initializing
-    init() {
-        defer { self.reactor = Reactor() }
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
         super.init(title: "Search")
     }
     
@@ -49,6 +47,7 @@ final class SearchListViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupUI()
+        self.reactor?.action.onNext(.load)
     }
     
     override func setupConstraints() {
