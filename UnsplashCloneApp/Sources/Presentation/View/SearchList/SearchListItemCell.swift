@@ -8,12 +8,21 @@
 import UIKit
 import ReactorKit
 import SnapKit
+import RxSwift
+import RxKingfisher
+import Then
+import RxCocoa
+internal import Kingfisher
 
 final class SearchListItemCell: BaseCollectionViewCell {
+    // MARK: - Constants
+    typealias Reactor = SearchListItemCellReactor
     
     // MARK: - UI
     let itemImageView: UIImageView = UIImageView()
-    let heartImageView:  UIImageView = UIImageView(image: UIImage().heartImage)
+    let heartImageView:  UIImageView = UIImageView(image: UIImage().heartImage).then {
+        $0.tintColor = .systemRed
+    }
     
     // MARK: Initializing
     override init(frame: CGRect) {
@@ -45,5 +54,23 @@ private extension SearchListItemCell {
             make.top.trailing.equalToSuperview().inset(12)
             make.size.equalTo(20)
         }
+    }
+}
+
+extension SearchListItemCell: ReactorKit.View {
+    func bind(reactor: Reactor) {
+        // MARK: - Action
+        
+        // MARK: - State
+        reactor.state.map { $0.model }
+            .compactMap { URLHelper.createEncodedURL(url: $0.urls?.thumb) }
+            .bind(to: self.itemImageView.kf.rx.image())
+            .disposed(by: self.disposeBag)
+        
+        reactor.state.map { $0.isLiked }
+            .map { !$0 }
+            .distinctUntilChanged()
+            .bind(to: self.heartImageView.rx.isHidden)
+            .disposed(by: self.disposeBag)
     }
 }

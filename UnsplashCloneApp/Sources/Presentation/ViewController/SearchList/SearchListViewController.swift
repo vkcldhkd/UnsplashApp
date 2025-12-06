@@ -10,13 +10,43 @@ import Then
 import ReactorKit
 import RxSwift
 import RxCocoa
+import RxDataSources
+import ReusableKit
 import SnapKit
 
 final class SearchListViewController: BaseViewController {
     // MARK: Constants
     typealias Reactor = SearchListViewReactor
+    fileprivate struct Reusable {
+        static let activityIndicatorView = ReusableView<CollectionActivityIndicatorView>()
+        static let listCell = ReusableCell<SearchListItemCell>()
+        static let emptyView = ReusableView<UICollectionReusableView>()
+    }
     
     // MARK: Properties
+    let dataSource: RxCollectionViewSectionedReloadDataSource<SearchListSection>
+    private static func dataSourceFactory() -> RxCollectionViewSectionedReloadDataSource<SearchListSection> {
+        return .init(
+            configureCell: { dataSource, collectionView, indexPath, sectionItem in
+                switch sectionItem {
+                case let .listItem(cellReactor):
+                    let cell = collectionView.dequeue(Reusable.listCell, for: indexPath)
+                    cell.reactor = cellReactor
+                    return cell
+                }
+            }, configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
+                switch kind {
+                case UICollectionView.elementKindSectionFooter:
+                    return collectionView.dequeue(Reusable.activityIndicatorView, kind: kind, for: indexPath)
+                    
+                default:
+                    return collectionView.dequeue(Reusable.emptyView, kind: "empty", for: indexPath)
+                }
+            }
+        )
+    }
+    
+    // MARK: UI
     var heartButton: UIButton = UIButton().then {
         let heartImage = UIImage().heartImage
         $0.setImage(heartImage, for: .normal)
@@ -24,16 +54,19 @@ final class SearchListViewController: BaseViewController {
         $0.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
     }
     
-    // MARK: UI
     let searchBar: UISearchBar = UISearchBar(frame: .zero)
     lazy var collectionView = BaseCollectionView(
         frame: .zero,
-        collectionViewLayout: UICollectionViewFlowLayout()
-    )
+        collectionViewLayout: FourColumnFlowLayout()
+    ).then {
+        $0.register(Reusable.listCell)
+        $0.register(Reusable.activityIndicatorView, kind: UICollectionView.elementKindSectionFooter)
+    }
     
     // MARK: Initializing
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
+        self.dataSource = type(of: self).dataSourceFactory()
         super.init(title: "Search")
     }
     
@@ -100,5 +133,8 @@ extension SearchListViewController: ReactorKit.View {
             .disposed(by: self.disposeBag)
         
         // MARK: - State
+        reactor.state.map { $0.sections }
+            .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: self.disposeBag)
     }
 }

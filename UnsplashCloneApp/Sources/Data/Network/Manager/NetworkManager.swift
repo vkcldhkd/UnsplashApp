@@ -48,9 +48,8 @@ extension NetworkManager {
                                 // 응답이 Dictionary 형태인 경우
                                 observer.onNext(dict)
                                 observer.onCompleted()
-                            } else if let array = jsonObject as? [[String: Any]],
-                                      let first = array.first {
-                                // 응답이 Array일 경우 → 첫 번째 Dictionary만 전달
+                            } else if let array = jsonObject as? [[String: Any]] {
+                                // 응답이 Array일 경우 → ["items": array] 형태로 전달
                                 observer.onNext(["items": array])
                                 observer.onCompleted()
                             } else {
