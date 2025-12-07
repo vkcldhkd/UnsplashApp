@@ -19,15 +19,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         
 //        // Data Layer
-        let repository = PhotoRepositoryImpl()
+        let photoRepository = PhotoRepositoryImpl()
+        let photoBookmarkRepository = PhotoBookmarkRepositoryImpl()
 //
 //        // Domain Layer
-        let useCase = LoadPhotosUseCaseImpl(repository: repository)
+        let loadPhotosUseCase = LoadPhotosUseCaseImpl(repository: photoRepository)
+        let toggleBookmarkUseCase = ToggleBookmarkUseCaseImpl(repository: photoBookmarkRepository)
         // View Layer
         
         let photoListViewController = BaseNavigationController(
             rootViewController: PhotoListViewController(
-                reactor: PhotoListViewReactor(loadPhotosUseCase: useCase)
+                reactor: PhotoListViewReactor(
+                    loadPhotosUseCase: loadPhotosUseCase,
+                    toggleBookmarkUseCase: toggleBookmarkUseCase
+                )
             )
         )
         

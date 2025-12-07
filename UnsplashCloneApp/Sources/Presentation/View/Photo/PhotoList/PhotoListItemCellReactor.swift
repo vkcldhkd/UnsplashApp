@@ -22,11 +22,14 @@ final class PhotoListItemCellReactor: Reactor {
     
     let initialState: State
     
-    init(model: PhotoItem) {
+    init(
+        model: PhotoItem,
+        isLiked: Bool = false
+    ) {
         defer { _ = self.state }
         self.initialState = State(
             model: model,
-            isLiked: false
+            isLiked: isLiked
         )
     }
     

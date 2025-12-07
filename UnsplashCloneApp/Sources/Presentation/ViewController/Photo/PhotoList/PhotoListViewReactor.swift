@@ -29,20 +29,25 @@ final class PhotoListViewReactor: Reactor {
         var isLoading: Bool
         var isLoadingNextPage: Bool
         
-        var loadPhotosUseCase: LoadPhotosUseCase
         var pagination: Pagination?
         var sections: [PhotoListSection]
         var keyword: String?
     }
     
     let initialState: State
+    private let loadPhotosUseCase: LoadPhotosUseCase
+    private let toggleBookmarkUseCase: ToggleBookmarkUseCase
     
-    init(loadPhotosUseCase: LoadPhotosUseCase) {
+    init(
+        loadPhotosUseCase: LoadPhotosUseCase,
+        toggleBookmarkUseCase: ToggleBookmarkUseCase
+    ) {
         defer { _ = self.state }
+        self.loadPhotosUseCase = loadPhotosUseCase
+        self.toggleBookmarkUseCase = toggleBookmarkUseCase
         self.initialState = State(
             isLoading: false,
             isLoadingNextPage: false,
-            loadPhotosUseCase: loadPhotosUseCase,
             sections: []
         )
     }
@@ -50,11 +55,12 @@ final class PhotoListViewReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .load:
+//            return .empty()
             guard !self.currentState.isLoading else { return .empty() }
             guard !self.currentState.isLoadingNextPage else { return .empty() }
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
-            let setSections = self.currentState.loadPhotosUseCase.fetchPhotos(.feed, page: 1, limit: PhotoListViewReactor.limit)
+            let setSections = self.loadPhotosUseCase.fetchPhotos(.feed, page: 1, limit: PhotoListViewReactor.limit)
                 .map { Mutation.setSections($0?.data) }
             return .concat(startLoading, setSections, endLoading)
             
@@ -72,7 +78,7 @@ final class PhotoListViewReactor: Reactor {
                     return .feed
                 }
             }
-            let appendSections = self.currentState.loadPhotosUseCase.fetchPhotos(photoReqeust, page: nextPage, limit: PhotoListViewReactor.limit)
+            let appendSections = self.loadPhotosUseCase.fetchPhotos(photoReqeust, page: nextPage, limit: PhotoListViewReactor.limit)
                 .map { Mutation.appendSections($0?.data) }
             return .concat([startLoading, appendSections, endLoading])
             
@@ -82,7 +88,7 @@ final class PhotoListViewReactor: Reactor {
                   !keyword.isEmpty else { return .empty() }
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
-            let setSections = self.currentState.loadPhotosUseCase.fetchPhotos(.search(query: keyword), page: 1, limit: PhotoListViewReactor.limit)
+            let setSections = self.loadPhotosUseCase.fetchPhotos(.search(query: keyword), page: 1, limit: PhotoListViewReactor.limit)
                 .map { Mutation.setSections($0?.data) }
             let setKeyword = Observable<Mutation>.just(.setKeyword(keyword))
             return .concat([startLoading, setKeyword, setSections, endLoading])
@@ -142,8 +148,9 @@ final class PhotoListViewReactor: Reactor {
 private extension PhotoListViewReactor {
     func createSectionItems(items: [PhotoItem]?) -> [PhotoListSection] {
         guard let items = items else { return [] }
+        let useCase = self.toggleBookmarkUseCase
         let sectionItems = items
-            .compactMap { PhotoListItemCellReactor(model: $0) }
+            .compactMap { PhotoListItemCellReactor(model: $0, isLiked: useCase.isLiked(photo: $0)) }
             .compactMap { PhotoListSectionItem.listItem($0) }
             
         return [PhotoListSection.list(sectionItems)]

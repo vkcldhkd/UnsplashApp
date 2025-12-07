@@ -24,13 +24,17 @@ final class PhotoDetailViewReactor: Reactor {
     }
     
     let initialState: State
+    private let toggleBookmarkUseCase: ToggleBookmarkUseCase
     
-    init(model: PhotoItem) {
+    init(
+        model: PhotoItem,
+        toggleBookmarkUseCase: ToggleBookmarkUseCase
+    ) {
         defer { _ = self.state }
-        
+        self.toggleBookmarkUseCase = toggleBookmarkUseCase
         let rows = PhotoDetailViewReactor.createRows(model: model)
         self.initialState = State(
-            isLiked: false,
+            isLiked: toggleBookmarkUseCase.isLiked(photo: model),
             model: model,
             rows: rows
         )
@@ -39,7 +43,8 @@ final class PhotoDetailViewReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .updateLiked:
-            let setLiked = Observable<Mutation>.just(.setLiked(!self.currentState.isLiked))
+            let setLiked = toggleBookmarkUseCase.execute(photo: self.currentState.model)
+                .map { Mutation.setLiked($0) }
             return Observable.concat([setLiked])
         }
     }

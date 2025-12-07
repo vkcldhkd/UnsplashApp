@@ -128,8 +128,19 @@ extension PhotoListViewController: ReactorKit.View {
         // MARK: - Action
         self.heartButton.rx.tap
             .throttle(.milliseconds(700), scheduler: MainScheduler.asyncInstance)
-            .subscribe(onNext: {
-                print("HEART BUTTON")
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe(
+                onNext: { [weak self] _ in
+                    let photoBookmarkRepository = PhotoBookmarkRepositoryImpl()
+                    let loadBookmarkPhotoUseCase = LoadBookmarkedPhotosUseCaseImpl(repository: photoBookmarkRepository)
+                    let toggleBookmarkUseCase = ToggleBookmarkUseCaseImpl(repository: photoBookmarkRepository)
+                    let bookmarkViewController = PhotoBookmarkViewController(
+                        reactor: PhotoBookmarkViewReactor(
+                            loadBookmarksUseCase: loadBookmarkPhotoUseCase,
+                            toggleBookmarkUseCase: toggleBookmarkUseCase
+                        )
+                    )
+                self?.navigationController?.pushViewController(bookmarkViewController, animated: true)
             })
             .disposed(by: self.disposeBag)
         
@@ -142,12 +153,20 @@ extension PhotoListViewController: ReactorKit.View {
         self.collectionView.rx.itemSelected(dataSource: self.dataSource)
             .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
             .observe(on: MainScheduler.asyncInstance)
-            .subscribe(onNext: { [weak self] sectionItem in
-                guard let self = self else { return }
-                switch sectionItem {
-                case let .listItem(cellReactor):
-                    let photoItem = cellReactor.currentState.model
-                    let detailVC = PhotoDetailViewController(reactor: PhotoDetailViewReactor(model: photoItem))
+            .subscribe(
+                onNext: { [weak self] sectionItem in
+                    guard let self = self else { return }
+                    switch sectionItem {
+                    case let .listItem(cellReactor):
+                        let photoItem = cellReactor.currentState.model
+                        let repository = PhotoBookmarkRepositoryImpl()
+                        let useCase = ToggleBookmarkUseCaseImpl(repository: repository)
+                        let detailVC = PhotoDetailViewController(
+                            reactor: PhotoDetailViewReactor(
+                                model: photoItem,
+                                toggleBookmarkUseCase: useCase
+                            )
+                        )
                     self.navigationController?.pushViewController(detailVC, animated: true)
                 }
             })
