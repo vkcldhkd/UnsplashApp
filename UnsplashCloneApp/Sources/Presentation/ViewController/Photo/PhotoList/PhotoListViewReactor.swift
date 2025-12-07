@@ -1,5 +1,5 @@
 //
-//  SearchListViewReactor.swift
+//  PhotoListViewReactor.swift
 //  UnsplashCloneApp
 //
 //  Created by HYUN SUNG on 12/5/25.
@@ -8,7 +8,7 @@
 import ReactorKit
 import RxSwift
 
-final class SearchListViewReactor: Reactor {
+final class PhotoListViewReactor: Reactor {
     enum Action {
         case load
     }
@@ -22,7 +22,7 @@ final class SearchListViewReactor: Reactor {
         var isLoading: Bool
         var isLoadingNextPage: Bool
         var loadPhotosUseCase: LoadPhotosUseCase
-        var sections: [SearchListSection]
+        var sections: [PhotoListSection]
     }
     
     let initialState: State
@@ -67,13 +67,13 @@ final class SearchListViewReactor: Reactor {
 }
 
 
-private extension SearchListViewReactor {
-    func createSectionItems(items: [PhotoItem]?) -> [SearchListSection] {
+private extension PhotoListViewReactor {
+    func createSectionItems(items: [PhotoItem]?) -> [PhotoListSection] {
         guard let items = items else { return [] }
         let sectionItems = items
-            .compactMap { SearchListItemCellReactor(model: $0) }
-            .compactMap { SearchListSectionItem.listItem($0) }
+            .compactMap { PhotoListItemCellReactor(model: $0) }
+            .compactMap { PhotoListSectionItem.listItem($0) }
             
-        return [SearchListSection.list(sectionItems)]
+        return [PhotoListSection.list(sectionItems)]
     }
 }

@@ -9,22 +9,23 @@ import Foundation
 
 
 // MARK: - PhotoItem
-struct PhotoItem: Codable {
+struct PhotoItem: Codable, Equatable {
     let id: String?
     let createdAt: String?
     let width, height: Int?
     let color: String?
     let urls: PhotoURLItem?
+    let user: User?
 
     enum CodingKeys: String, CodingKey {
         case id
         case createdAt = "created_at"
-        case width, height, color, urls
+        case width, height, color, urls, user
     }
 }
 
 // MARK: - Urls
-struct PhotoURLItem: Codable {
+struct PhotoURLItem: Codable, Equatable {
     let raw, full, regular, small: String?
     let thumb, smallS3: String?
 

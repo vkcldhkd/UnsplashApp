@@ -1,5 +1,5 @@
 //
-//  SearchListViewController.swift
+//  PhotoListViewController.swift
 //  UnsplashCloneApp
 //
 //  Created by HYUN SUNG on 12/5/25.
@@ -14,18 +14,18 @@ import RxDataSources
 import ReusableKit
 import SnapKit
 
-final class SearchListViewController: BaseViewController {
+final class PhotoListViewController: BaseViewController {
     // MARK: Constants
-    typealias Reactor = SearchListViewReactor
+    typealias Reactor = PhotoListViewReactor
     fileprivate struct Reusable {
         static let activityIndicatorView = ReusableView<CollectionActivityIndicatorView>()
-        static let listCell = ReusableCell<SearchListItemCell>()
+        static let listCell = ReusableCell<PhotoListItemCell>()
         static let emptyView = ReusableView<UICollectionReusableView>()
     }
     
     // MARK: Properties
-    let dataSource: RxCollectionViewSectionedReloadDataSource<SearchListSection>
-    private static func dataSourceFactory() -> RxCollectionViewSectionedReloadDataSource<SearchListSection> {
+    let dataSource: RxCollectionViewSectionedReloadDataSource<PhotoListSection>
+    private static func dataSourceFactory() -> RxCollectionViewSectionedReloadDataSource<PhotoListSection> {
         return .init(
             configureCell: { dataSource, collectionView, indexPath, sectionItem in
                 switch sectionItem {
@@ -67,7 +67,7 @@ final class SearchListViewController: BaseViewController {
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
         self.dataSource = type(of: self).dataSourceFactory()
-        super.init(title: "Search")
+        super.init(title: "Photo")
     }
     
     required convenience init(coder aDecoder: NSCoder) {
@@ -91,22 +91,21 @@ final class SearchListViewController: BaseViewController {
         
         self.collectionView.snp.makeConstraints { make in
             make.top.equalTo(self.searchBar.snp.bottom)
-            make.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
         }
     }
 }
 
-private extension SearchListViewController {
+private extension PhotoListViewController {
     // MARK: - setupUI
     func setupUI() {
-        self.setupSearchBar()
+        self.setupPhotoBar()
         self.setupNavigationBar()
         self.setupCollectionView()
     }
     
-    // MARK: - setupSearchBar
-    func setupSearchBar() {
+    // MARK: - setupPhotoBar
+    func setupPhotoBar() {
         self.view.addSubview(self.searchBar)
     }
     
@@ -122,7 +121,7 @@ private extension SearchListViewController {
 }
 
 
-extension SearchListViewController: ReactorKit.View {
+extension PhotoListViewController: ReactorKit.View {
     func bind(reactor: Reactor) {
         // MARK: - Action
         self.heartButton.rx.tap
@@ -131,6 +130,22 @@ extension SearchListViewController: ReactorKit.View {
                 print("HEART BUTTON")
             })
             .disposed(by: self.disposeBag)
+        
+        self.collectionView.rx.itemSelected(dataSource: self.dataSource)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe(onNext: { [weak self] sectionItem in
+                guard let self = self else { return }
+                switch sectionItem {
+                case let .listItem(cellReactor):
+                    let photoItem = cellReactor.currentState.model
+                    let detailVC = PhotoDetailViewController(reactor: PhotoDetailViewReactor(model: photoItem))
+                    self.navigationController?.pushViewController(detailVC, animated: true)
+                }
+                
+            })
+            .disposed(by: self.disposeBag)
+        
         
         // MARK: - State
         reactor.state.map { $0.sections }

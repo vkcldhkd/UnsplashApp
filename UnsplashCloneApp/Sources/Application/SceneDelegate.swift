@@ -25,15 +25,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let useCase = LoadPhotosUseCaseImpl(repository: repository)
         // View Layer
         
-        let searchListViewController = BaseNavigationController(
-            rootViewController: SearchListViewController(
-                reactor: SearchListViewReactor(loadPhotosUseCase: useCase)
+        let photoListViewController = BaseNavigationController(
+            rootViewController: PhotoListViewController(
+                reactor: PhotoListViewReactor(loadPhotosUseCase: useCase)
             )
         )
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         self.window = UIWindow(windowScene: windowScene)
-        self.window?.rootViewController = searchListViewController
+        self.window?.rootViewController = photoListViewController
         self.window?.makeKeyAndVisible()
     }
 }

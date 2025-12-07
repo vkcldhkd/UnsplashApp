@@ -10,7 +10,7 @@ import UIKit
 final class FourColumnFlowLayout: UICollectionViewFlowLayout {
 
     private let itemsPerRow: CGFloat = 4
-    private let spacing: CGFloat = 0
+    private let spacing: CGFloat = 1
 
     override func prepare() {
         super.prepare()

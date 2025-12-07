@@ -1,5 +1,5 @@
 //
-//  SearchListItemCell.swift
+//  PhotoListItemCell.swift
 //  UnsplashCloneApp
 //
 //  Created by HYUN SUNG on 12/5/25.
@@ -14,9 +14,9 @@ import Then
 import RxCocoa
 internal import Kingfisher
 
-final class SearchListItemCell: BaseCollectionViewCell {
+final class PhotoListItemCell: BaseCollectionViewCell {
     // MARK: - Constants
-    typealias Reactor = SearchListItemCellReactor
+    typealias Reactor = PhotoListItemCellReactor
     
     // MARK: - UI
     let itemImageView: UIImageView = UIImageView()
@@ -38,7 +38,7 @@ final class SearchListItemCell: BaseCollectionViewCell {
 }
 
 
-private extension SearchListItemCell {
+private extension PhotoListItemCell {
     // MARK: - setupUI
     func setupUI() {
         self.contentView.addSubview(self.itemImageView)
@@ -57,7 +57,7 @@ private extension SearchListItemCell {
     }
 }
 
-extension SearchListItemCell: ReactorKit.View {
+extension PhotoListItemCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         // MARK: - Action
         

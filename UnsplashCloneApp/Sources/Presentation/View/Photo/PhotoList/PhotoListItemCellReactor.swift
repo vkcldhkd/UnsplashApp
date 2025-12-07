@@ -1,5 +1,5 @@
 //
-//  SearchListItemCellReactor.swift
+//  PhotoListItemCellReactor.swift
 //  UnsplashCloneApp
 //
 //  Created by HYUN SUNG on 12/7/25.
@@ -8,7 +8,7 @@
 import ReactorKit
 import RxSwift
 
-final class SearchListItemCellReactor: Reactor {
+final class PhotoListItemCellReactor: Reactor {
     enum Action {
     }
     
