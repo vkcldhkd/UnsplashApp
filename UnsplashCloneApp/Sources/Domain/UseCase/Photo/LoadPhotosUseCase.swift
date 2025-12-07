@@ -17,7 +17,7 @@ protocol LoadPhotosUseCase {
 
 final class LoadPhotosUseCaseImpl: LoadPhotosUseCase {
     private let repository: PhotoRepository
-
+    
     init(repository: PhotoRepository) {
         self.repository = repository
     }
@@ -25,7 +25,7 @@ final class LoadPhotosUseCaseImpl: LoadPhotosUseCase {
     func execute(
         _ request: PhotoRequest,
         page: Int,
-        limit: Int = 30
+        limit: Int
     ) -> Observable<NetworkResponse<PhotoResponse>?> {
         return repository.fetchSearchList(request, page: page, limit: limit)
     }

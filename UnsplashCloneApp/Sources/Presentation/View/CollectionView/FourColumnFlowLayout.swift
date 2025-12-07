@@ -25,5 +25,10 @@ final class FourColumnFlowLayout: UICollectionViewFlowLayout {
         self.minimumInteritemSpacing = spacing
         self.minimumLineSpacing = spacing
         self.sectionInset = .zero
+        
+        self.footerReferenceSize = CGSize(
+            width: collectionView.bounds.width,
+            height: 100
+        )
     }
 }

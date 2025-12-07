@@ -131,6 +131,12 @@ extension PhotoListViewController: ReactorKit.View {
             })
             .disposed(by: self.disposeBag)
         
+        self.collectionView.rx.isReachedBottom
+            .throttle(.microseconds(300), scheduler: MainScheduler.asyncInstance)
+            .map { Reactor.Action.loadMore }
+            .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
         self.collectionView.rx.itemSelected(dataSource: self.dataSource)
             .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
             .observe(on: MainScheduler.asyncInstance)
