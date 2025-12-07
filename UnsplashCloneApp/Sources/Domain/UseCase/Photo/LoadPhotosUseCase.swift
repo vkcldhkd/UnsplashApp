@@ -25,7 +25,7 @@ final class LoadPhotosUseCaseImpl: LoadPhotosUseCase {
     func execute(
         _ request: PhotoRequest,
         page: Int,
-        limit: Int
+        limit: Int = 30
     ) -> Observable<NetworkResponse<PhotoResponse>?> {
         return repository.fetchSearchList(request, page: page, limit: limit)
     }

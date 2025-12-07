@@ -17,6 +17,7 @@ class BaseCollectionView: UICollectionView {
         self.showsHorizontalScrollIndicator = false
         self.showsVerticalScrollIndicator = false
         self.contentInsetAdjustmentBehavior = .never
+        self.keyboardDismissMode = .onDrag
     }
     
     required init?(coder: NSCoder) {

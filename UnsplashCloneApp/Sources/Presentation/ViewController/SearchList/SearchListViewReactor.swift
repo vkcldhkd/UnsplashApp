@@ -44,7 +44,7 @@ final class SearchListViewReactor: Reactor {
             guard !self.currentState.isLoadingNextPage else { return .empty() }
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
-            let setSections = self.currentState.loadPhotosUseCase.execute(.feed, page: 1, limit: 10)
+            let setSections = self.currentState.loadPhotosUseCase.execute(.feed, page: 1, limit: 28)
                 .map { Mutation.setSections($0?.data) }
             return .concat(startLoading, setSections, endLoading)
         }
