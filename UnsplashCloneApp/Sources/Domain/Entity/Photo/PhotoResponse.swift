@@ -7,5 +7,5 @@
 
 // MARK: - PhotoResponse
 struct PhotoResponse: Codable {
-    let items: [PhotoItem]?
+    let results: [PhotoItem]?
 }

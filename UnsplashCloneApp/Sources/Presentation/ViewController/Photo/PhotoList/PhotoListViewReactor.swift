@@ -14,6 +14,7 @@ final class PhotoListViewReactor: Reactor {
     enum Action {
         case load
         case loadMore
+        case search(String?)
     }
     
     enum Mutation {
@@ -21,6 +22,7 @@ final class PhotoListViewReactor: Reactor {
         case setLoadingNextPage(Bool)
         case setSections(PhotoResponse?)
         case appendSections(PhotoResponse?)
+        case setKeyword(String?)
     }
     
     struct State {
@@ -30,6 +32,7 @@ final class PhotoListViewReactor: Reactor {
         var loadPhotosUseCase: LoadPhotosUseCase
         var pagination: Pagination?
         var sections: [PhotoListSection]
+        var keyword: String?
     }
     
     let initialState: State
@@ -51,7 +54,7 @@ final class PhotoListViewReactor: Reactor {
             guard !self.currentState.isLoadingNextPage else { return .empty() }
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
-            let setSections = self.currentState.loadPhotosUseCase.execute(.feed, page: 1, limit: PhotoListViewReactor.limit)
+            let setSections = self.currentState.loadPhotosUseCase.fetchPhotos(.feed, page: 1, limit: PhotoListViewReactor.limit)
                 .map { Mutation.setSections($0?.data) }
             return .concat(startLoading, setSections, endLoading)
             
@@ -61,9 +64,28 @@ final class PhotoListViewReactor: Reactor {
             guard let nextPage = PaginationHelper.getNextPage(pagination: self.currentState.pagination) else { return .empty() }
             let startLoading = Observable<Mutation>.just(.setLoadingNextPage(true))
             let endLoading = Observable<Mutation>.just(.setLoadingNextPage(false))
-            let appendSections = self.currentState.loadPhotosUseCase.execute(.feed, page: nextPage, limit: PhotoListViewReactor.limit)
+            var photoReqeust: PhotoRequest {
+                if let keyword = self.currentState.keyword,
+                   !keyword.isEmpty {
+                    return .search(query: keyword)
+                } else {
+                    return .feed
+                }
+            }
+            let appendSections = self.currentState.loadPhotosUseCase.fetchPhotos(photoReqeust, page: nextPage, limit: PhotoListViewReactor.limit)
                 .map { Mutation.appendSections($0?.data) }
             return .concat([startLoading, appendSections, endLoading])
+            
+        case let .search(keyword):
+            guard !self.currentState.isLoading else { return .empty() }
+            guard let keyword = keyword,
+                  !keyword.isEmpty else { return .empty() }
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            let setSections = self.currentState.loadPhotosUseCase.fetchPhotos(.search(query: keyword), page: 1, limit: PhotoListViewReactor.limit)
+                .map { Mutation.setSections($0?.data) }
+            let setKeyword = Observable<Mutation>.just(.setKeyword(keyword))
+            return .concat([startLoading, setKeyword, setSections, endLoading])
         }
     }
     
@@ -81,7 +103,7 @@ final class PhotoListViewReactor: Reactor {
             
         case let .setSections(response):
             var newState = state
-            let sections = self.createSectionItems(items: response?.items)
+            let sections = self.createSectionItems(items: response?.results)
             newState.pagination = PaginationHelper.check(
                 pagination: Pagination(
                     lastPage: nil,
@@ -96,7 +118,7 @@ final class PhotoListViewReactor: Reactor {
             var newState = state
             let currentItems = self.currentState.sections
                 .compactMap { $0.items }.reduce([], +)
-            let appendItems = self.createSectionItems(items: response?.items)
+            let appendItems = self.createSectionItems(items: response?.results)
                 .compactMap { $0.items }.reduce([], +)
             newState.sections = [.list(currentItems + appendItems)]
             newState.pagination = PaginationHelper.check(
@@ -106,6 +128,11 @@ final class PhotoListViewReactor: Reactor {
                     currentPage: (newState.pagination?.currentPage ?? 0) + 1
                 )
             )
+            return newState
+            
+        case let .setKeyword(keyword):
+            var newState = state
+            newState.keyword = keyword
             return newState
         }
     }

@@ -8,7 +8,7 @@
 import RxSwift
 
 protocol LoadPhotosUseCase {
-    func execute(
+    func fetchPhotos(
         _ request: PhotoRequest,
         page: Int,
         limit: Int
@@ -22,7 +22,7 @@ final class LoadPhotosUseCaseImpl: LoadPhotosUseCase {
         self.repository = repository
     }
 
-    func execute(
+    func fetchPhotos(
         _ request: PhotoRequest,
         page: Int,
         limit: Int

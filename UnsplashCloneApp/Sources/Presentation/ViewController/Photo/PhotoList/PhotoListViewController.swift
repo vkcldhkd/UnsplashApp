@@ -54,7 +54,9 @@ final class PhotoListViewController: BaseViewController {
         $0.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
     }
     
-    let searchBar: UISearchBar = UISearchBar(frame: .zero)
+    let searchBar: UISearchBar = UISearchBar(frame: .zero).then {
+        $0.placeholder = "키워드를 입력해 주세요."
+    }
     lazy var collectionView = BaseCollectionView(
         frame: .zero,
         collectionViewLayout: FourColumnFlowLayout()
@@ -148,11 +150,15 @@ extension PhotoListViewController: ReactorKit.View {
                     let detailVC = PhotoDetailViewController(reactor: PhotoDetailViewReactor(model: photoItem))
                     self.navigationController?.pushViewController(detailVC, animated: true)
                 }
-                
             })
             .disposed(by: self.disposeBag)
         
-        
+        self.searchBar.rx.searchButtonClicked
+            .withLatestFrom(self.searchBar.rx.text.orEmpty)
+            .map { Reactor.Action.search($0) }
+            .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+
         // MARK: - State
         reactor.state.map { $0.sections }
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
