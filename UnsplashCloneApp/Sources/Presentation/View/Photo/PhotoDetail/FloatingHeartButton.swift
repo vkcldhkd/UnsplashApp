@@ -10,9 +10,11 @@ import RxSwift
 
 final class FloatingHeartButton: UIButton {
 
+    // MARK: - Properties
     private let symbolConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
     private var currentIsLiked: Bool = false
 
+    // MARK: - Initializing
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setupUI()
@@ -60,16 +62,12 @@ private extension FloatingHeartButton {
         let tint: UIColor = currentIsLiked ? .systemRed : .systemGray2
 
         let applyState: () -> Void = { [weak self] in
-            guard let self = self else { return }
-            if #available(iOS 15.0, *) {
-                var config = self.configuration ?? UIButton.Configuration.plain()
-                config.image = image
-                config.baseForegroundColor = tint
-                self.configuration = config
-            } else {
-                self.setImage(image, for: .normal)
-                self.tintColor = tint
-            }
+            guard let self else { return }
+
+            var config = self.configuration ?? .plain()
+            config.image = image
+            config.baseForegroundColor = tint
+            self.configuration = config
         }
 
         guard animated else {
