@@ -37,6 +37,14 @@ final class PhotoBookmarkViewReactor: Reactor {
         )
     }
     
+    func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromPhotoItemEvent = PhotoItem.event
+            .withUnretained(self)
+            .flatMap { $0.0.fromPhotoItemEvent(from: $0.1) }
+        
+        return Observable.of(mutation, fromPhotoItemEvent).merge()
+    }
+    
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .load:
@@ -67,5 +75,24 @@ private extension PhotoBookmarkViewReactor {
         return items
             .map { PhotoListItemCellReactor(model: $0, isLiked: toggleBookmarkUseCase.isLiked(photo: $0)) }
             .map { PhotoListSectionItem.listItem($0) }
+    }
+    
+    func fromPhotoItemEvent(
+        from event: PhotoItem.Event
+    ) -> Observable<Mutation> {
+        switch event {
+        case let .like(item, isLiked):
+            if isLiked {
+                // 갱신
+                let setSectionItems = self.loadBookmarksUseCase.execute()
+                    .map { Mutation.setSectionItems($0) }
+                return .concat([setSectionItems])
+            } else {
+                // 삭제
+                let setSectionItems = self.loadBookmarksUseCase.removed(removeItemID: item.id)
+                    .map { Mutation.setSectionItems($0) }
+                return .concat([setSectionItems])
+            }
+        }
     }
 }

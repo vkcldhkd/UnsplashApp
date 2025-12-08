@@ -29,3 +29,12 @@ enum PhotoListSectionItem {
     case listItem(PhotoListItemCellReactor)
 }
 
+extension PhotoListSectionItem {
+    func getCellReacotr() -> PhotoListItemCellReactor? {
+        switch self {
+        case let .listItem(cellReactor):
+            return cellReactor
+        }
+    }
+}
+

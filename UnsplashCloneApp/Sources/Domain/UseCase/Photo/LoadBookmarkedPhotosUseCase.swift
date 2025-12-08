@@ -9,6 +9,7 @@ import RxSwift
 
 protocol LoadBookmarkedPhotosUseCase {
     func execute() -> Observable<[PhotoItem]>
+    func removed(removeItemID: String?) -> Observable<[PhotoItem]>
 }
 
 final class LoadBookmarkedPhotosUseCaseImpl: LoadBookmarkedPhotosUseCase {
@@ -20,5 +21,11 @@ final class LoadBookmarkedPhotosUseCaseImpl: LoadBookmarkedPhotosUseCase {
 
     func execute() -> Observable<[PhotoItem]> {
         return Observable.just(repository.loadAll())
+    }
+    
+    func removed(removeItemID: String?) -> Observable<[PhotoItem]> {
+        let filteredItem = repository.loadAll()
+            .filter { $0.id != removeItemID }
+        return Observable.just(filteredItem)
     }
 }

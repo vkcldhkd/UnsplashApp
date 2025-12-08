@@ -9,7 +9,10 @@ import Foundation
 
 
 // MARK: - PhotoItem
-struct PhotoItem: Codable, Equatable {
+struct PhotoItem: Codable, Equatable, ModelType {
+    enum Event {
+        case like(item: PhotoItem, isLiked: Bool)
+    }
     let id: String?
     let createdAt: String?
     let width, height: Int?

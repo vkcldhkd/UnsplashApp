@@ -43,6 +43,7 @@ final class PhotoBookmarkViewController: BaseViewController {
     ).then {
         $0.register(Reusable.listCell)
     }
+    let emptyView = BookmarkEmptyView()
     
     // MARK: Initializing
     
@@ -62,6 +63,11 @@ final class PhotoBookmarkViewController: BaseViewController {
         super.viewDidLoad()
         self.setupUI()
         self.reactor?.action.onNext(.load)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.emptyView.frame = self.collectionView.bounds
     }
     
     override func setupConstraints() {
@@ -107,6 +113,11 @@ extension PhotoBookmarkViewController: ReactorKit.View {
         // MARK: - State
         reactor.state.map { $0.sections }
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: self.disposeBag)
+        
+        reactor.state.map { $0.sections.first?.items.isEmpty ?? true }
+            .distinctUntilChanged()
+            .bind(to: self.collectionView.rx.isEmptyBackground(emptyView: self.emptyView))
             .disposed(by: self.disposeBag)
     }
 }

@@ -17,5 +17,16 @@ extension Reactive where Base: UICollectionView {
         }
         return ControlEvent(events: source)
     }
+    
+    func isEmptyBackground(emptyView: UIView) -> Binder<Bool> {
+        return Binder(base) { collectionView, isEmpty in
+            if isEmpty {
+                emptyView.frame = collectionView.bounds
+                collectionView.backgroundView = emptyView
+            } else {
+                collectionView.backgroundView = nil
+            }
+        }
+    }
 }
 

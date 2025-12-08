@@ -9,10 +9,10 @@ import ReactorKit
 import RxSwift
 
 final class PhotoListItemCellReactor: Reactor {
-    enum Action {
-    }
+    typealias Action = NoAction
     
     enum Mutation {
+        case setLiked(Bool)
     }
     
     struct State {
@@ -33,11 +33,34 @@ final class PhotoListItemCellReactor: Reactor {
         )
     }
     
-    func mutate(action: Action) -> Observable<Mutation> {
-        return .empty()
+    func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromPhotoItemEvent = PhotoItem.event
+            .withUnretained(self)
+            .flatMap { $0.0.fromPhotoItemEvent(from: $0.1) }
+        
+        return Observable.of(mutation, fromPhotoItemEvent).merge()
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
-        return state
+        switch mutation {
+        case let .setLiked(isLiked):
+            var newState = state
+            newState.isLiked = isLiked
+            return newState
+        }
+    }
+}
+
+
+private extension PhotoListItemCellReactor {
+    func fromPhotoItemEvent(
+        from event: PhotoItem.Event
+    ) -> Observable<Mutation> {
+        switch event {
+        case let .like(item, isLiked):
+            guard self.currentState.model.id == item.id else { return .empty() }
+            let setLiked = Observable<Mutation>.just(.setLiked(isLiked))
+            return .concat([setLiked])
+        }
     }
 }

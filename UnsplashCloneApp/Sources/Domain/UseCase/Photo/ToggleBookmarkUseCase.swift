@@ -31,9 +31,11 @@ final class ToggleBookmarkUseCaseImpl: ToggleBookmarkUseCase {
         
         if repository.isBookmarked(id: id) {
             repository.remove(id: id)
+            PhotoItem.event.onNext(.like(item: photo, isLiked: false))
             return Observable.just(false)
         } else {
             repository.add(photo)
+            PhotoItem.event.onNext(.like(item: photo, isLiked: true))
             return Observable.just(true)
         }
     }
