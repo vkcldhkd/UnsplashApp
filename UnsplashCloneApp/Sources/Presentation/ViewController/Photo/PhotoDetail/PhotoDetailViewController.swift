@@ -72,7 +72,7 @@ final class PhotoDetailViewController: BaseViewController {
         
         self.contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width) // 세로 스크롤용
+            make.width.equalTo(self.scrollView.snp.width) // 세로 스크롤용
         }
         
         self.photoImageView.snp.makeConstraints { make in
