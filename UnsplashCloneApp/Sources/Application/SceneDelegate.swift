@@ -19,7 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         
 //        // Data Layer
-        let photoRepository = PhotoRepositoryImpl()
+        let photoRepository = PhotoRepositoryImpl(clientID: "UKHUCSynoHy_OOV_e-5Joa81I5JGwWaO1OAV8iFTonU")
         let photoBookmarkRepository = PhotoBookmarkRepositoryImpl()
 //
 //        // Domain Layer

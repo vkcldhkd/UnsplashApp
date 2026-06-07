@@ -23,52 +23,47 @@ import Alamofire
 
 
 final class PhotoRepositoryImpl: PhotoRepository {
-    private static let feedBaseURL: String = "https://api.unsplash.com/photos"
-    private static let searchBaseURL: String = "https://api.unsplash.com/search/photos"
-    private static let clientID: String = "UKHUCSynoHy_OOV_e-5Joa81I5JGwWaO1OAV8iFTonU"
+    private let clientID: String
+
+    init(clientID: String) {
+        self.clientID = clientID
+    }
     
     func fetchSearchList(
         _ request: PhotoRequest,
         page: Int,
         limit: Int
     ) -> Observable<NetworkResponse<PhotoResponse>?> {
-        let queryItems: [URLQueryItem]? = PhotoRepositoryImpl.createURLItems(
-            request: request,
-            page: page,
-            limit: limit
+        let path = URLHelper.createAbsolutePath(
+            baseURL: request.baseURL,
+            queryItems: makeQueryItems(
+                request: request,
+                page: page,
+                limit: limit
+            )
         )
-        
-        let path: String = URLHelper.createAbsolutePath(
-            baseURL: request == .feed ? PhotoRepositoryImpl.feedBaseURL : PhotoRepositoryImpl.searchBaseURL ,
-            queryItems: queryItems
-        )
+
         return NetworkManager.request(method: .get, url: path)
             .map { try? NetworkResponse<PhotoResponse>(path: path, json: $0) }
     }
 }
 
 private extension PhotoRepositoryImpl {
-    static func createURLItems(
+    func makeQueryItems(
         request: PhotoRequest,
         page: Int,
         limit: Int
-    ) -> [URLQueryItem]? {
-        switch request {
-        case .feed:
-            return [
-                URLQueryItem(name: "page", value: "\(page)"),
-                URLQueryItem(name: "per_page", value: "\(limit)"),
-                URLQueryItem(name: "client_id", value: PhotoRepositoryImpl.clientID),
-            ]
-        case let .search(query):
-            return [
-                URLQueryItem(name: "query", value: query),
-                URLQueryItem(name: "page", value: "\(page)"),
-                URLQueryItem(name: "per_page", value: "\(limit)"),
-                URLQueryItem(name: "client_id", value: PhotoRepositoryImpl.clientID),
-            ]
+    ) -> [URLQueryItem] {
+        var items = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "per_page", value: "\(limit)"),
+            URLQueryItem(name: "client_id", value: clientID)
+        ]
+
+        if let queryItem = request.queryItem {
+            items.insert(queryItem, at: 0)
         }
+
+        return items
     }
-    
-    
 }
