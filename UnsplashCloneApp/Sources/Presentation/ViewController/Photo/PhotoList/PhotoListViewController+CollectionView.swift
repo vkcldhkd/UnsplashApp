@@ -24,27 +24,38 @@ extension PhotoListViewController {
             .bind(to: reactor.action)
             .disposed(by: self.disposeBag)
         
-        self.collectionView.rx.itemSelected(dataSource: self.dataSource)
-            .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
-            .observe(on: MainScheduler.asyncInstance)
-            .subscribe(
-                onNext: { [weak self] sectionItem in
-                    guard let self = self else { return }
-                    switch sectionItem {
-                    case let .listItem(cellReactor):
-                        let photoItem = cellReactor.currentState.model
-                        let repository = PhotoBookmarkRepositoryImpl()
-                        let useCase = ToggleBookmarkUseCaseImpl(repository: repository)
-                        let detailVC = PhotoDetailViewController(
-                            reactor: PhotoDetailViewReactor(
-                                model: photoItem,
-                                toggleBookmarkUseCase: useCase
-                            )
-                        )
-                    self.navigationController?.pushViewController(detailVC, animated: true)
-                }
-            })
-            .disposed(by: self.disposeBag)
+        Observable.zip(
+            self.collectionView.rx.itemSelected,
+            self.collectionView.rx.itemSelected(dataSource: self.dataSource)
+         )
+         .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
+         .observe(on: MainScheduler.instance)
+         .subscribe(onNext: { [weak self] indexPath, sectionItem in
+             guard let self else { return }
+
+             self.updateSelectedIndexPath(indexPath)
+
+             switch sectionItem {
+             case let .listItem(cellReactor):
+                 let photoItem = cellReactor.currentState.model
+
+                 let repository = PhotoBookmarkRepositoryImpl()
+                 let useCase = ToggleBookmarkUseCaseImpl(repository: repository)
+
+                 let detailVC = PhotoDetailViewController(
+                     reactor: PhotoDetailViewReactor(
+                         model: photoItem,
+                         toggleBookmarkUseCase: useCase
+                     )
+                 )
+
+                 self.navigationController?.pushViewController(
+                     detailVC,
+                     animated: true
+                 )
+             }
+         })
+         .disposed(by: disposeBag)
         
         // MARK: - State
         reactor.state.map { $0.sections }

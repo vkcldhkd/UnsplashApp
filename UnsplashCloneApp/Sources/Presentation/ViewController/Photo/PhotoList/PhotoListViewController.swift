@@ -46,6 +46,13 @@ final class PhotoListViewController: BaseViewController {
         )
     }
     
+    private let transitionController = PhotoTransitionController()
+    private var selectedIndexPath: IndexPath?
+    var selectedCell: PhotoListItemCell? {
+        guard let selectedIndexPath else { return nil }
+        return collectionView.cellForItem(at: selectedIndexPath) as? PhotoListItemCell
+    }
+    
     // MARK: UI
     var heartButton: UIButton = UIButton().then {
         let heartImage = UIImage().heartImage
@@ -114,6 +121,7 @@ private extension PhotoListViewController {
     // MARK: - setupNavigationBar
     func setupNavigationBar() {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: self.heartButton)
+        self.navigationController?.delegate = self.transitionController
     }
     
     // MARK: - setupCollectionView
@@ -128,5 +136,20 @@ extension PhotoListViewController: ReactorKit.View {
         self.bindButtons(reactor: reactor)
         self.bindSearchBar(reactor: reactor)
         self.bindCollectionView(reactor: reactor, dataSource: self.dataSource)
+    }
+}
+
+extension PhotoListViewController: PhotoTransitionSource {
+    var transitionSourceImageView: UIImageView? {
+        return selectedCell?.itemImageView
+    }
+
+    var transitionSourceFrame: CGRect? {
+        guard let imageView = transitionSourceImageView else { return nil }
+        return imageView.superview?.convert(imageView.frame, to: nil)
+    }
+    
+    func updateSelectedIndexPath(_ indexPath: IndexPath) {
+        selectedIndexPath = indexPath
     }
 }

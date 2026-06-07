@@ -29,7 +29,7 @@ final class PhotoDetailViewController: BaseViewController {
     private let contentView = UIView()
 
     private let photoImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleToFill
         $0.cornerRadius = 16
     }
     private let infoCardView = UIView().then {
@@ -147,5 +147,16 @@ extension PhotoDetailViewController: ReactorKit.View {
             .distinctUntilChanged()
             .bind(to: self.heartButton.rx.isLiked)
             .disposed(by: self.disposeBag)
+    }
+}
+
+extension PhotoDetailViewController: PhotoTransitionDestination {
+    var transitionDestinationImageView: UIImageView? {
+        return self.photoImageView
+    }
+    
+    func prepareTransitionLayout() {
+        view.layoutIfNeeded()
+        self.photoImageView.superview?.layoutIfNeeded()
     }
 }

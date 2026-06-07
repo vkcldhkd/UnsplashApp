@@ -19,7 +19,9 @@ final class PhotoListItemCell: BaseCollectionViewCell {
     typealias Reactor = PhotoListItemCellReactor
     
     // MARK: - UI
-    let itemImageView: UIImageView = UIImageView()
+    let itemImageView: UIImageView = UIImageView().then {
+        $0.contentMode = .scaleToFill
+    }
     let heartImageView:  UIImageView = UIImageView(image: UIImage().heartImage).then {
         $0.tintColor = .systemRed
     }
