@@ -55,7 +55,7 @@ extension PhotoListViewController {
                  )
              }
          })
-         .disposed(by: disposeBag)
+         .disposed(by: self.disposeBag)
         
         // MARK: - State
         reactor.state.map { $0.sections }

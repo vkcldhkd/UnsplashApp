@@ -45,6 +45,12 @@ final class PhotoBookmarkViewController: BaseViewController {
     }
     let emptyView = BookmarkEmptyView()
     
+    private let transitionController = PhotoTransitionController()
+    private var selectedIndexPath: IndexPath?
+    var selectedCell: PhotoListItemCell? {
+        guard let selectedIndexPath else { return nil }
+        return collectionView.cellForItem(at: selectedIndexPath) as? PhotoListItemCell
+    }
     // MARK: Initializing
     
     init(reactor: Reactor) {
@@ -82,33 +88,44 @@ private extension PhotoBookmarkViewController {
     // MARK: - setupUI
     func setupUI() {
         self.view.addSubview(self.collectionView)
+        self.navigationController?.delegate = self.transitionController
     }
 }
 
 extension PhotoBookmarkViewController: ReactorKit.View {
     func bind(reactor: Reactor) {
         // MARK: - Action
-        self.collectionView.rx.itemSelected(dataSource: self.dataSource)
-            .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
-            .observe(on: MainScheduler.asyncInstance)
-            .subscribe(
-                onNext: { [weak self] sectionItem in
-                    guard let self = self else { return }
-                    switch sectionItem {
-                    case let .listItem(cellReactor):
-                        let photoItem = cellReactor.currentState.model
-                        let repository = PhotoBookmarkRepositoryImpl()
-                        let useCase = ToggleBookmarkUseCaseImpl(repository: repository)
-                        let detailVC = PhotoDetailViewController(
-                            reactor: PhotoDetailViewReactor(
-                                model: photoItem,
-                                toggleBookmarkUseCase: useCase
-                            )
-                        )
-                    self.navigationController?.pushViewController(detailVC, animated: true)
-                }
-            })
-            .disposed(by: self.disposeBag)
+        Observable.zip(
+            self.collectionView.rx.itemSelected,
+            self.collectionView.rx.itemSelected(dataSource: self.dataSource)
+         )
+         .throttle(.milliseconds(300), scheduler: MainScheduler.asyncInstance)
+         .observe(on: MainScheduler.instance)
+         .subscribe(onNext: { [weak self] indexPath, sectionItem in
+             guard let self else { return }
+             self.selectedIndexPath = indexPath
+
+             switch sectionItem {
+             case let .listItem(cellReactor):
+                 let photoItem = cellReactor.currentState.model
+
+                 let repository = PhotoBookmarkRepositoryImpl()
+                 let useCase = ToggleBookmarkUseCaseImpl(repository: repository)
+
+                 let detailVC = PhotoDetailViewController(
+                     reactor: PhotoDetailViewReactor(
+                         model: photoItem,
+                         toggleBookmarkUseCase: useCase
+                     )
+                 )
+
+                 self.navigationController?.pushViewController(
+                     detailVC,
+                     animated: true
+                 )
+             }
+         })
+         .disposed(by: self.disposeBag)
         
         // MARK: - State
         reactor.state.map { $0.sections }
@@ -119,5 +136,20 @@ extension PhotoBookmarkViewController: ReactorKit.View {
             .distinctUntilChanged()
             .bind(to: self.collectionView.rx.isEmptyBackground(emptyView: self.emptyView))
             .disposed(by: self.disposeBag)
+    }
+}
+
+extension PhotoBookmarkViewController: PhotoTransitionSource {
+    var transitionSourceImageView: UIImageView? {
+        return selectedCell?.itemImageView
+    }
+
+    var transitionSourceFrame: CGRect? {
+        guard let imageView = transitionSourceImageView else { return nil }
+        return imageView.superview?.convert(imageView.frame, to: nil)
+    }
+    
+    func updateSelectedIndexPath(_ indexPath: IndexPath) {
+        selectedIndexPath = indexPath
     }
 }
