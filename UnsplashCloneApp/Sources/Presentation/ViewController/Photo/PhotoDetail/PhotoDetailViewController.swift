@@ -6,10 +6,10 @@
 //
 
 import UIKit
-
 import ReactorKit
 import RxSwift
 import RxCocoa
+import RxGesture
 import Then
 import SnapKit
 import RxKingfisher
@@ -63,6 +63,9 @@ final class PhotoDetailViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.setupUI()
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
     override func setupConstraints() {
@@ -129,6 +132,22 @@ extension PhotoDetailViewController: ReactorKit.View {
             .throttle(.milliseconds(700), scheduler: MainScheduler.asyncInstance)
             .map { Reactor.Action.updateLiked }
             .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        self.photoImageView.rx.tapGesture()
+            .when(.recognized)
+            .observe(on: MainScheduler.asyncInstance)
+            .subscribe(onNext: { [weak self] _ in
+                print("Clicked PhotoImageView")
+                guard let self = self else { return }
+                guard let image = self.photoImageView.image else { return }
+                let viewerVC = PhotoViewerViewController(image: image)
+                viewerVC.modalPresentationStyle = .custom
+                self.navigationController?.pushViewController(
+                    viewerVC,
+                    animated: true
+                )
+            })
             .disposed(by: self.disposeBag)
         
         // MARK: - State
