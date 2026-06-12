@@ -38,6 +38,7 @@ final class PhotoViewerViewController: BaseViewController {
         super.viewDidLoad()
 
         self.setupView()
+        self.setupNavigationBar()
         self.bindGesture()
     }
 
@@ -60,33 +61,28 @@ private extension PhotoViewerViewController {
         self.rootView.scrollView.minimumZoomScale = self.viewModel.minimumZoomScale
         self.rootView.scrollView.maximumZoomScale = self.viewModel.maximumZoomScale
     }
+    
+    func setupNavigationBar() {
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
+            target: self,
+            action: #selector(didTapDismissButton)
+        )
 
+        self.navigationController?.navigationBar.tintColor = .white
+    }
+    
     func bindGesture() {
-        let singleTap = rootView.rx.tapGesture { gesture, _ in
-            gesture.numberOfTapsRequired = 1
-        }
-        .share()
-
-        let doubleTap = rootView.rx.tapGesture { gesture, _ in
+        self.rootView.rx.tapGesture { gesture, _ in
             gesture.numberOfTapsRequired = 2
         }
-        .share()
-
-        singleTap
-            .when(.recognized)
-            .withUnretained(self)
-            .subscribe(onNext: { owner, _ in
-                owner.dismiss(animated: true)
-            })
-            .disposed(by: disposeBag)
-
-        doubleTap
-            .when(.recognized)
-            .withUnretained(self)
-            .subscribe(onNext: { owner, gesture in
-                owner.handleDoubleTap(gesture)
-            })
-            .disposed(by: disposeBag)
+        .when(.recognized)
+        .withUnretained(self)
+        .subscribe(onNext: { owner, gesture in
+            owner.handleDoubleTap(gesture)
+        })
+        .disposed(by: self.disposeBag)
     }
 }
 
@@ -183,6 +179,11 @@ private extension PhotoViewerViewController {
             to: rect,
             animated: true
         )
+    }
+    
+    @objc
+    private func didTapDismissButton() {
+        self.dismiss(animated: true)
     }
 }
 

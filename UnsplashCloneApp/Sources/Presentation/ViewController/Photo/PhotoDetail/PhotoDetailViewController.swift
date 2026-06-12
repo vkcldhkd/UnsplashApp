@@ -142,11 +142,11 @@ extension PhotoDetailViewController: ReactorKit.View {
                 guard let self = self else { return }
                 guard let image = self.photoImageView.image else { return }
                 let viewerVC = PhotoViewerViewController(image: image)
-                viewerVC.modalPresentationStyle = .custom
-                self.navigationController?.pushViewController(
-                    viewerVC,
-                    animated: true
-                )
+//                viewerVC.modalPresentationStyle = .custom
+                
+                let naviVC = BaseNavigationController(rootViewController: viewerVC)
+                naviVC.modalPresentationStyle = .fullScreen
+                self.present(naviVC, animated: true)
             })
             .disposed(by: self.disposeBag)
         
